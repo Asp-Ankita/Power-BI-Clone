@@ -70,12 +70,18 @@ if uploaded_file:
     pivot_df = df.pivot_table(index=pivot_cat, values=pivot_val, aggfunc='sum').reset_index()
     st.dataframe(pivot_df)
 
-    # Export Pivot
+        # Export Pivot - FIXED
+    import io
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        pivot_df.to_excel(writer, index=False, sheet_name='PivotSummary')
+    output.seek(0)
+
     st.download_button(
         label="⬇️ Download Pivot Table as Excel",
-        data=pivot_df.to_excel(index=False, engine='xlsxwriter'),
-        file_name="pivot_summary.xlsx"
+        data=output,
+        file_name="pivot_summary.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
 else:
     st.info("Please upload an Excel file to begin.")
